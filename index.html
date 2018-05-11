@@ -4,7 +4,7 @@
 
 <script type="text/javascript">
 var ctx = null;
-var gameMap = [
+var gameMap = [ 																								//GAMEMAP - self explanitory
 	6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 4, 7, 4,
 	6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 4, 4, 4,
 	6, 6, 6, 1, 1, 1, 1, 1, 6, 6, 2, 6, 6, 6, 6, 6, 1, 1, 1, 1,
@@ -26,20 +26,20 @@ var gameMap = [
 	4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4,
 	7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 ];
-var tileW = 40, tileH = 40;
+var tileW = 40, tileH = 40; //sizes of map and tile
 var mapW = 20, mapH = 20;
-var currentSecond = 0, frameCount = 0, framesLastSecond = 0, lastFrameTime = 0;
-var cont = false;
+var currentSecond = 0, frameCount = 0, framesLastSecond = 0, lastFrameTime = 0; //for dev purposes to see the kind of FPS I need
+var cont = false; //variables used for the tile event triggers
 var keyCollected = false;
 var onDoor = false;
 
-var floorTypes = {
+var floorTypes = { //floor types: shows if a block is traversable or not
 	solid	: 0,
 	path	: 1,
 	water	: 2
 };
 
-var tileEvents = {
+var tileEvents = { //tile events, the numbers correspond to a block on the map ()(y * mapW) + x)
 	120 : createBridge,
 	337 : collectKey,
 	199 : openDoor,
@@ -48,7 +48,7 @@ var tileEvents = {
 	380 : createBridge4,
 
 
-};
+};  //FUNCTIONS FOR TILE EVENTS
 function createBridge(){
 	gameMap[toIndex(5,7)] = (gameMap[toIndex(5,7)]==4 ? 2 : 4);
 	gameMap[toIndex(10,2)] = (gameMap[toIndex(5,7)]==2 ? 4 : 2);
@@ -83,7 +83,7 @@ function openDoor(){
 
 }
 
-
+//TYPES OF TILES, THEIR "Walkability", AND COLOR OF TILE
 var tileTypes = {
 	0 : { color:"#685b48", floor:floorTypes.solid	},
 	1 : { color:"#5aa457", floor:floorTypes.path	},
@@ -96,7 +96,7 @@ var tileTypes = {
 	8 : { color:"#996633", floor:floorTypes.path},
 };
 
-var keysDown = {
+var keysDown = { //TO MOVE THE CHARACTER
 	37 : false,
 	38 : false,
 	39 : false,
@@ -111,6 +111,8 @@ document.addEventListener('keydown', function(event) {
     }
 }, true);
 
+// HOW THE CAMERA WORKS, Takes half of screen on each side of block then follows it's position to each new block
+// that the character moves to
 var viewport = {
 	screen		: [0,0],
 	startTile	: [0,0],
@@ -138,6 +140,7 @@ var viewport = {
 
 var player = new Character();
 
+//CHARACTER FUNCTION: Above is a call to create a new character
 function Character()
 {
 	this.tileFrom	= [1,1];
@@ -147,7 +150,7 @@ function Character()
 	this.position	= [45,45];
 	this.delayMove	= 200;
 }
-Character.prototype.placeAt = function(x, y)
+Character.prototype.placeAt = function(x, y) //function which places the character at a specific tile
 {
 	this.tileFrom	= [x,y];
 	this.tileTo		= [x,y];
@@ -155,7 +158,7 @@ Character.prototype.placeAt = function(x, y)
 		((tileH*y)+((tileH-this.dimensions[1])/2))];
 		console.log(this.position);
 };
-Character.prototype.processMovement = function(t)
+Character.prototype.processMovement = function(t) //processes the movement, adding a delay between squares which it is allowed to travel
 {
 	if(this.tileFrom[0]==this.tileTo[0] && this.tileFrom[1]==this.tileTo[1]) { return false; }
 
@@ -165,7 +168,7 @@ Character.prototype.processMovement = function(t)
 
 		if(typeof tileEvents[toIndex(this.tileTo[0], this.tileTo[1])]!='undefined')
 		{
-			tileEvents[toIndex(this.tileTo[0], this.tileTo[1])](this);
+			tileEvents[toIndex(this.tileTo[0], this.tileTo[1])](this); //checks if an event is occuring if the player hits that tile
 		}
 
 	}
@@ -191,7 +194,7 @@ Character.prototype.processMovement = function(t)
 
 	return true;
 }
-Character.prototype.canMoveTo = function(x, y)
+Character.prototype.canMoveTo = function(x, y) //function which tells if a character can move to a certain tile, depending on it's material
 {
 	if(x < 0 || x >= mapW || y < 0 || y >= mapH) { return false; }
 	if(tileTypes[gameMap[toIndex(x,y)]].floor!=floorTypes.path) { return false; }
@@ -207,7 +210,7 @@ Character.prototype.moveRight	= function(t) { this.tileTo[0]+=1; this.timeMoved 
 Character.prototype.moveUp		= function(t) { this.tileTo[1]-=1; this.timeMoved = t; };
 Character.prototype.moveDown	= function(t) { this.tileTo[1]+=1; this.timeMoved = t; };
 
-function toIndex(x, y)
+function toIndex(x, y) //how i find the specific tiles for tile events
 {
 	return((y * mapW) + x);
 }
@@ -229,7 +232,7 @@ window.onload = function()
 		document.getElementById('game').height];
 };
 
-function drawGame()
+function drawGame() //draws the map, character, and everything involving the game including the text
 {
 	if(ctx==null) { return; }
 
@@ -253,7 +256,7 @@ function drawGame()
 		else if(keysDown[39] && player.canMoveRight())	{ player.moveRight(currentFrameTime); }
 	}
 
-	viewport.update(player.position[0] + (player.dimensions[0]/2),
+	viewport.update(player.position[0] + (player.dimensions[0]/2), //draws the camera viewport
 		player.position[1] + (player.dimensions[1]/2));
 
 	ctx.fillStyle = "#000000";
@@ -278,7 +281,7 @@ function drawGame()
 
 
 		if(keyCollected){
-			ctx.fillText("Key Collected", 20, 25);
+			ctx.fillText("Key Collected", 20, 25); //words on the screen for the advancement of the game
 		}
 
 		if(keyCollected && onDoor){
